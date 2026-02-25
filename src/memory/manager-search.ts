@@ -15,6 +15,7 @@ export type SearchRowResult = {
   score: number;
   snippet: string;
   source: SearchSource;
+  tier?: string;
 };
 
 export async function searchVector(params: {
@@ -35,7 +36,7 @@ export async function searchVector(params: {
     const rows = params.db
       .prepare(
         `SELECT c.id, c.path, c.start_line, c.end_line, c.text,\n` +
-          `       c.source,\n` +
+          `       c.source, c.tier,\n` +
           `       vec_distance_cosine(v.embedding, ?) AS dist\n` +
           `  FROM ${params.vectorTable} v\n` +
           `  JOIN chunks c ON c.id = v.id\n` +
@@ -57,7 +58,7 @@ export async function searchVector(params: {
       source: SearchSource;
       dist: number;
     }>;
-    return rows.map((row) => ({
+    const results = rows.map((row) => ({
       id: row.id,
       path: row.path,
       startLine: row.start_line,
@@ -65,7 +66,18 @@ export async function searchVector(params: {
       score: 1 - row.dist,
       snippet: truncateUtf16Safe(row.text, params.snippetMaxChars),
       source: row.source,
+      tier: row.tier,
     }));
+
+    // Update access tracking
+    if (results.length > 0) {
+      const ids = results.map((r) => r.id);
+      const now = Date.now();
+      params.db.exec(
+        `UPDATE chunks SET access_count = access_count + 1, last_accessed = ${now} WHERE id IN (${ids.map((id) => `'${id}'`).join(",")})`,
+      );
+    }
+    return results;
   }
 
   const candidates = listChunks({
@@ -108,7 +120,7 @@ export function listChunks(params: {
 }> {
   const rows = params.db
     .prepare(
-      `SELECT id, path, start_line, end_line, text, embedding, source\n` +
+      `SELECT id, path, start_line, end_line, text, embedding, source, tier\n` +
         `  FROM chunks\n` +
         ` WHERE model = ?${params.sourceFilter.sql}`,
     )
@@ -130,6 +142,7 @@ export function listChunks(params: {
     text: row.text,
     embedding: parseEmbedding(row.embedding),
     source: row.source,
+    tier: row.tier,
   }));
 }
 
@@ -158,7 +171,7 @@ export async function searchKeyword(params: {
 
   const rows = params.db
     .prepare(
-      `SELECT id, path, source, start_line, end_line, text,\n` +
+      `SELECT id, path, source, start_line, end_line, text, tier,\n` +
         `       bm25(${params.ftsTable}) AS rank\n` +
         `  FROM ${params.ftsTable}\n` +
         ` WHERE ${params.ftsTable} MATCH ?${modelClause}${params.sourceFilter.sql}\n` +
@@ -175,7 +188,7 @@ export async function searchKeyword(params: {
     rank: number;
   }>;
 
-  return rows.map((row) => {
+  const results = rows.map((row) => {
     const textScore = params.bm25RankToScore(row.rank);
     return {
       id: row.id,
@@ -186,6 +199,17 @@ export async function searchKeyword(params: {
       textScore,
       snippet: truncateUtf16Safe(row.text, params.snippetMaxChars),
       source: row.source,
+      tier: row.tier,
     };
   });
+
+  // Update access tracking
+  if (results.length > 0) {
+    const ids = results.map((r) => r.id);
+    const now = Date.now();
+    params.db.exec(
+      `UPDATE chunks SET access_count = access_count + 1, last_accessed = ${now} WHERE id IN (${ids.map((id) => `'${id}'`).join(",")})`,
+    );
+  }
+  return results;
 }

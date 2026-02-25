@@ -78,6 +78,11 @@ import { renderNodes } from "./views/nodes.ts";
 import { renderOverview } from "./views/overview.ts";
 import { renderSessions } from "./views/sessions.ts";
 import { renderSkills } from "./views/skills.ts";
+import { renderMissionControl } from "./views/mission-control.ts";
+import { renderWorkboards } from "./views/workboards.ts";
+import { renderIntel } from "./views/intel.ts";
+import { renderSchedules } from "./views/schedules.ts";
+import { renderMemories } from "./views/memories.ts";
 
 const AVATAR_DATA_RE = /^data:/i;
 const AVATAR_HTTP_RE = /^https?:\/\//i;
@@ -323,6 +328,12 @@ export function renderApp(state: AppViewState) {
             ${isChat ? renderChatControls(state) : nothing}
           </div>
         </section>
+
+        ${state.tab === "mission-control" ? renderMissionControl(state) : nothing}
+        ${state.tab === "workboards" ? renderWorkboards(state) : nothing}
+        ${state.tab === "intel" ? renderIntel(state) : nothing}
+        ${state.tab === "schedules" ? renderSchedules(state) : nothing}
+        ${state.tab === "memories" ? renderMemories(state) : nothing}
 
         ${
           state.tab === "overview"

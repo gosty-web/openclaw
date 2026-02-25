@@ -122,13 +122,15 @@ export async function getReplyFromConfig(
 
   const finalized = finalizeInboundContext(ctx);
 
+  let nativeAudio: Array<{ data: Buffer; mimeType: string }> | undefined;
   if (!isFastTestEnv) {
-    await applyMediaUnderstanding({
+    const mediaResult = await applyMediaUnderstanding({
       ctx: finalized,
       cfg,
       agentDir,
       activeModel: { provider, model },
     });
+    nativeAudio = mediaResult.nativeAudio;
     await applyLinkUnderstanding({
       ctx: finalized,
       cfg,
@@ -326,6 +328,7 @@ export async function getReplyFromConfig(
 
   return runPreparedReply({
     ctx,
+    nativeAudio,
     sessionCtx,
     cfg,
     agentId,

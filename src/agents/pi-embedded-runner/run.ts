@@ -50,6 +50,7 @@ import {
 } from "../pi-embedded-helpers.js";
 import { derivePromptTokens, normalizeUsage, type UsageLike } from "../usage.js";
 import { redactRunIdentifier, resolveRunWorkspaceDir } from "../workspace-run.js";
+import { IntelligenceExtractor } from "../intelligence-extractor.js";
 import { compactEmbeddedPiSessionDirect } from "./compact.js";
 import { resolveGlobalLane, resolveSessionLane } from "./lanes.js";
 import { log } from "./logger.js";
@@ -566,6 +567,12 @@ export async function runEmbeddedPiAgent(
 
           const prompt =
             provider === "anthropic" ? scrubAnthropicRefusalMagic(params.prompt) : params.prompt;
+
+          // User Intelligence Extraction
+          void IntelligenceExtractor.extract({
+            userId: params.senderId || "default",
+            message: prompt,
+          }).catch(err => log.error(`Intelligence extraction failed: ${String(err)}`));
 
           const attempt = await runEmbeddedAttempt({
             sessionId: params.sessionId,

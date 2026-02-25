@@ -16,6 +16,7 @@ export const en: TranslationMap = {
   },
   nav: {
     chat: "Chat",
+    mission: "Mission",
     control: "Control",
     agent: "Agent",
     settings: "Settings",
@@ -36,6 +37,11 @@ export const en: TranslationMap = {
     config: "Config",
     debug: "Debug",
     logs: "Logs",
+    "mission-control": "Mission Control",
+    workboards: "Workboards",
+    intel: "Intelligence",
+    schedules: "Schedules",
+    memories: "Memories",
   },
   subtitles: {
     agents: "Manage agent workspaces, tools, and identities.",
@@ -51,6 +57,11 @@ export const en: TranslationMap = {
     config: "Edit ~/.openclaw/openclaw.json safely.",
     debug: "Gateway snapshots, events, and manual RPC calls.",
     logs: "Live tail of the gateway file logs.",
+    "mission-control": "Global mission status and hive activity.",
+    workboards: "Task kanban and team orchestration.",
+    intel: "User behavior patterns and intelligence insights.",
+    schedules: "Predictive task initiation and scheduled runs.",
+    memories: "Tiered retrieval and long-term memory management.",
   },
   overview: {
     access: {

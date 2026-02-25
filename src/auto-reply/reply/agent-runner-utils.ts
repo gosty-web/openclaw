@@ -183,6 +183,7 @@ export function buildEmbeddedRunBaseParams(params: {
     execOverrides: params.run.execOverrides,
     bashElevated: params.run.bashElevated,
     timeoutMs: params.run.timeoutMs,
+    nativeAudio: params.run.nativeAudio,
     runId: params.runId,
   };
 }

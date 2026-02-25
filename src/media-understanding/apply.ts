@@ -38,6 +38,7 @@ export type ApplyMediaUnderstandingResult = {
   appliedAudio: boolean;
   appliedVideo: boolean;
   appliedFile: boolean;
+  nativeAudio?: Array<{ data: Buffer; mimeType: string }>;
 };
 
 const CAPABILITY_ORDER: MediaUnderstandingCapability[] = ["image", "audio", "video"];
@@ -555,6 +556,21 @@ export async function applyMediaUnderstanding(params: {
       });
     }
 
+    const nativeAudio: Array<{ data: Buffer; mimeType: string }> = [];
+    if (params.activeModel?.provider === "google") {
+      const audioAttachments = attachments.filter((a) => resolveAttachmentKind(a) === "audio");
+      for (const a of audioAttachments) {
+        try {
+          const buf = await cache.getBuffer({ attachmentIndex: a.index });
+          if (buf) {
+            nativeAudio.push({ data: buf.buffer, mimeType: buf.mime || "audio/wav" });
+          }
+        } catch {
+          // ignore
+        }
+      }
+    }
+
     return {
       outputs,
       decisions,
@@ -562,6 +578,7 @@ export async function applyMediaUnderstanding(params: {
       appliedAudio: outputs.some((output) => output.kind === "audio.transcription"),
       appliedVideo: outputs.some((output) => output.kind === "video.description"),
       appliedFile: fileBlocks.length > 0,
+      nativeAudio: nativeAudio.length > 0 ? nativeAudio : undefined,
     };
   } finally {
     await cache.cleanup();

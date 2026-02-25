@@ -236,6 +236,8 @@ export type AppViewState = {
   skillEdits: Record<string, string>;
   skillMessages: Record<string, SkillMessage>;
   skillsBusyKey: string | null;
+  missionControlData: import("./controllers/mission-control.ts").MissionControlData | null;
+  missionControlStats: import("./controllers/mission-control.ts").MissionControlStats | null;
   debugLoading: boolean;
   debugStatus: StatusSummary | null;
   debugHealth: HealthSnapshot | null;
@@ -304,6 +306,7 @@ export type AppViewState = {
   handleLoadNodes: () => Promise<void>;
   handleLoadPresence: () => Promise<void>;
   handleLoadSkills: () => Promise<void>;
+  handleLoadMissionControl: () => Promise<void>;
   handleLoadDebug: () => Promise<void>;
   handleLoadLogs: () => Promise<void>;
   handleDebugCall: () => Promise<void>;

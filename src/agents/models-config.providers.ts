@@ -187,6 +187,10 @@ const NVIDIA_DEFAULT_COST = {
   cacheWrite: 0,
 };
 
+const XAI_BASE_URL = "https://api.x.ai/v1";
+const DEEPSEEK_BASE_URL = "https://api.deepseek.com";
+const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
+
 const log = createSubsystemLogger("agents/model-providers");
 
 interface OllamaModel {
@@ -949,6 +953,90 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "nvidia", store: authStore });
   if (nvidiaKey) {
     providers.nvidia = { ...buildNvidiaProvider(), apiKey: nvidiaKey };
+  }
+
+  const xaiKey =
+    resolveEnvApiKeyVarName("xai") ??
+    resolveApiKeyFromProfiles({ provider: "xai", store: authStore });
+  if (xaiKey) {
+    providers.xai = {
+      baseUrl: XAI_BASE_URL,
+      api: "openai-completions",
+      apiKey: xaiKey,
+      models: [
+        {
+          id: "grok-2-latest",
+          name: "xAI Grok 2",
+          reasoning: false,
+          input: ["text", "image"],
+          contextWindow: 131072,
+          maxTokens: 4096,
+          cost: { input: 2, output: 10, cacheRead: 0, cacheWrite: 0 },
+        },
+      ],
+    };
+  }
+
+  const deepseekKey =
+    resolveEnvApiKeyVarName("deepseek") ??
+    resolveApiKeyFromProfiles({ provider: "deepseek", store: authStore });
+  if (deepseekKey) {
+    providers.deepseek = {
+      baseUrl: DEEPSEEK_BASE_URL,
+      api: "openai-completions",
+      apiKey: deepseekKey,
+      models: [
+        {
+          id: "deepseek-chat",
+          name: "DeepSeek V3",
+          reasoning: false,
+          input: ["text"],
+          contextWindow: 64000,
+          maxTokens: 8192,
+          cost: { input: 0.14, output: 0.28, cacheRead: 0.014, cacheWrite: 0.14 },
+        },
+        {
+          id: "deepseek-reasoner",
+          name: "DeepSeek R1",
+          reasoning: true,
+          input: ["text"],
+          contextWindow: 64000,
+          maxTokens: 8192,
+          cost: { input: 0.55, output: 2.19, cacheRead: 0.14, cacheWrite: 0.55 },
+        },
+      ],
+    };
+  }
+
+  const groqKey =
+    resolveEnvApiKeyVarName("groq") ??
+    resolveApiKeyFromProfiles({ provider: "groq", store: authStore });
+  if (groqKey) {
+    providers.groq = {
+      baseUrl: GROQ_BASE_URL,
+      api: "openai-completions",
+      apiKey: groqKey,
+      models: [
+        {
+          id: "llama-3.3-70b-versatile",
+          name: "Groq Llama 3.3 70B",
+          reasoning: false,
+          input: ["text"],
+          contextWindow: 128000,
+          maxTokens: 32768,
+          cost: { input: 0.59, output: 0.79, cacheRead: 0, cacheWrite: 0 },
+        },
+        {
+          id: "deepseek-r1-distill-llama-70b",
+          name: "Groq DeepSeek R1 Llama 70B",
+          reasoning: true,
+          input: ["text"],
+          contextWindow: 128000,
+          maxTokens: 32768,
+          cost: { input: 0.59, output: 0.79, cacheRead: 0, cacheWrite: 0 },
+        },
+      ],
+    };
   }
 
   return providers;

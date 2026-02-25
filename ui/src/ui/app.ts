@@ -343,6 +343,9 @@ export class OpenClawApp extends LitElement {
   @state() skillsBusyKey: string | null = null;
   @state() skillMessages: Record<string, SkillMessage> = {};
 
+  @state() missionControlData: import("./controllers/mission-control.ts").MissionControlData | null = null;
+  @state() missionControlStats: import("./controllers/mission-control.ts").MissionControlStats | null = null;
+
   @state() debugLoading = false;
   @state() debugStatus: StatusSummary | null = null;
   @state() debugHealth: HealthSnapshot | null = null;
@@ -378,6 +381,7 @@ export class OpenClawApp extends LitElement {
   private nodesPollInterval: number | null = null;
   private logsPollInterval: number | null = null;
   private debugPollInterval: number | null = null;
+  missionControlPollInterval: number | null = null;
   private logsScrollFrame: number | null = null;
   private toolStreamById = new Map<string, ToolStreamEntry>();
   private toolStreamOrder: string[] = [];
@@ -603,6 +607,7 @@ export class OpenClawApp extends LitElement {
       this.sidebarCloseTimer = null;
     }, 200);
   }
+
 
   handleSplitRatioChange(ratio: number) {
     const newRatio = Math.max(0.4, Math.min(0.7, ratio));
