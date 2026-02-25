@@ -123,6 +123,7 @@ async function sendResetSessionNotice(params: {
 
 type RunPreparedReplyParams = {
   ctx: MsgContext;
+  nativeAudio?: Array<{ data: Buffer; mimeType: string }>;
   sessionCtx: TemplateContext;
   cfg: OpenClawConfig;
   agentId: string;
@@ -181,6 +182,7 @@ export async function runPreparedReply(
 ): Promise<ReplyPayload | ReplyPayload[] | undefined> {
   const {
     ctx,
+    nativeAudio,
     sessionCtx,
     cfg,
     agentId,
@@ -489,6 +491,7 @@ export async function runPreparedReply(
         defaultLevel: resolvedElevatedLevel ?? "off",
       },
       timeoutMs,
+      nativeAudio,
       blockReplyBreak: resolvedBlockStreamingBreak,
       ownerNumbers: command.ownerList.length > 0 ? command.ownerList : undefined,
       extraSystemPrompt: extraSystemPrompt || undefined,

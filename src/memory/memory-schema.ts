@@ -32,6 +32,11 @@ export function ensureMemoryIndexSchema(params: {
       model TEXT NOT NULL,
       text TEXT NOT NULL,
       embedding TEXT NOT NULL,
+      access_count INTEGER NOT NULL DEFAULT 0,
+      last_accessed INTEGER,
+      summary TEXT,
+      topic_cluster TEXT,
+      tier TEXT NOT NULL DEFAULT 'long-term', -- 'session', 'long-term', 'archival'
       updated_at INTEGER NOT NULL
     );
   `);
@@ -76,6 +81,12 @@ export function ensureMemoryIndexSchema(params: {
 
   ensureColumn(params.db, "files", "source", "TEXT NOT NULL DEFAULT 'memory'");
   ensureColumn(params.db, "chunks", "source", "TEXT NOT NULL DEFAULT 'memory'");
+  ensureColumn(params.db, "chunks", "access_count", "INTEGER NOT NULL DEFAULT 0");
+  ensureColumn(params.db, "chunks", "last_accessed", "INTEGER");
+  ensureColumn(params.db, "chunks", "summary", "TEXT");
+  ensureColumn(params.db, "chunks", "topic_cluster", "TEXT");
+  ensureColumn(params.db, "chunks", "tier", "TEXT NOT NULL DEFAULT 'long-term'");
+
   params.db.exec(`CREATE INDEX IF NOT EXISTS idx_chunks_path ON chunks(path);`);
   params.db.exec(`CREATE INDEX IF NOT EXISTS idx_chunks_source ON chunks(source);`);
 

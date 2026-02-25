@@ -9,6 +9,7 @@ import { mistralProvider } from "./mistral/index.js";
 import { moonshotProvider } from "./moonshot/index.js";
 import { openaiProvider } from "./openai/index.js";
 import { zaiProvider } from "./zai/index.js";
+import { elevenlabsProvider } from "./elevenlabs/index.js";
 
 const PROVIDERS: MediaUnderstandingProvider[] = [
   groqProvider,
@@ -20,6 +21,7 @@ const PROVIDERS: MediaUnderstandingProvider[] = [
   mistralProvider,
   zaiProvider,
   deepgramProvider,
+  elevenlabsProvider,
 ];
 
 export function normalizeMediaProviderId(id: string): string {

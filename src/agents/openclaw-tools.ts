@@ -16,7 +16,16 @@ import { createSessionStatusTool } from "./tools/session-status-tool.js";
 import { createSessionsHistoryTool } from "./tools/sessions-history-tool.js";
 import { createSessionsListTool } from "./tools/sessions-list-tool.js";
 import { createSessionsSendTool } from "./tools/sessions-send-tool.js";
+import { createAgentSendTool } from "./tools/agent-send-tool.js";
+import { createSpeakTool } from "./tools/speak-tool.js";
 import { createSessionsSpawnTool } from "./tools/sessions-spawn-tool.js";
+import { createVoiceMessageTool } from "./tools/voice-message-tool.js";
+import { createRuntimeConfigTool } from "./tools/runtime-config-tool.js";
+import {
+  createScheduleTaskTool,
+  createListScheduledTasksTool,
+  createCancelScheduledTaskTool
+} from "./tools/scheduling-tools.js";
 import { createSubagentsTool } from "./tools/subagents-tool.js";
 import { createTtsTool } from "./tools/tts-tool.js";
 import { createWebFetchTool, createWebSearchTool } from "./tools/web-tools.js";
@@ -144,6 +153,17 @@ export function createOpenClawTools(options?: {
       agentChannel: options?.agentChannel,
       sandboxed: options?.sandboxed,
     }),
+    createAgentSendTool({
+      agentSessionKey: options?.agentSessionKey,
+      agentChannel: options?.agentChannel,
+      sandboxed: options?.sandboxed,
+    }),
+    createVoiceMessageTool(),
+    createSpeakTool(),
+    createRuntimeConfigTool(),
+    createScheduleTaskTool(),
+    createListScheduledTasksTool(),
+    createCancelScheduledTaskTool(),
     createSessionsSpawnTool({
       agentSessionKey: options?.agentSessionKey,
       agentChannel: options?.agentChannel,

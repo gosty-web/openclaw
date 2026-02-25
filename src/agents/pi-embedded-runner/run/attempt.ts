@@ -112,6 +112,7 @@ import {
   shouldFlagCompactionTimeout,
 } from "./compaction-timeout.js";
 import { detectAndLoadPromptImages } from "./images.js";
+import { detectAndLoadPromptAudio } from "./audio.js";
 import type { EmbeddedRunAttemptParams, EmbeddedRunAttemptResult } from "./types.js";
 
 type PromptBuildHookRunner = {
@@ -1071,6 +1072,18 @@ export async function runEmbeddedAttempt(
         }
 
         try {
+          // Detect and load audio referenced in the prompt for Gemini models.
+          const audioResult = await detectAndLoadPromptAudio({
+            prompt: effectivePrompt,
+            workspaceDir: effectiveWorkspace,
+            model: params.model,
+            existingAudio: params.nativeAudio,
+            sandbox:
+              sandbox?.enabled && sandbox?.fsBridge
+                ? { root: sandbox.workspaceDir, bridge: sandbox.fsBridge }
+                : undefined,
+          });
+
           // Detect and load images referenced in the prompt for vision-capable models.
           // This eliminates the need for an explicit "view" tool call by injecting
           // images directly into the prompt when the model supports it.
@@ -1154,8 +1167,16 @@ export async function runEmbeddedAttempt(
 
           // Only pass images option if there are actually images to pass
           // This avoids potential issues with models that don't expect the images parameter
+          const promptOptions: any = {};
           if (imageResult.images.length > 0) {
-            await abortable(activeSession.prompt(effectivePrompt, { images: imageResult.images }));
+            promptOptions.images = imageResult.images;
+          }
+          if (audioResult.audio.length > 0) {
+            promptOptions.audio = audioResult.audio;
+          }
+
+          if (Object.keys(promptOptions).length > 0) {
+            await abortable(activeSession.prompt(effectivePrompt, promptOptions));
           } else {
             await abortable(activeSession.prompt(effectivePrompt));
           }

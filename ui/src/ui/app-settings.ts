@@ -4,6 +4,8 @@ import {
   stopLogsPolling,
   startDebugPolling,
   stopDebugPolling,
+  startMissionControlPolling,
+  stopMissionControlPolling,
 } from "./app-polling.ts";
 import { scheduleChatScroll, scheduleLogsScroll } from "./app-scroll.ts";
 import type { OpenClawApp } from "./app.ts";
@@ -165,6 +167,11 @@ export function setTab(host: SettingsHost, next: Tab) {
   } else {
     stopDebugPolling(host as unknown as Parameters<typeof stopDebugPolling>[0]);
   }
+  if (next === "mission-control") {
+    startMissionControlPolling(host as unknown as Parameters<typeof startMissionControlPolling>[0]);
+  } else {
+    stopMissionControlPolling(host as unknown as Parameters<typeof stopMissionControlPolling>[0]);
+  }
   void refreshActiveTab(host);
   syncUrlWithTab(host, next, false);
 }
@@ -198,6 +205,14 @@ export async function refreshActiveTab(host: SettingsHost) {
   }
   if (host.tab === "cron") {
     await loadCron(host);
+  }
+  if (host.tab === "mission-control") {
+    const { loadMissionControlData, loadMissionControlStats } = await import("./controllers/mission-control.ts");
+    const app = host as unknown as OpenClawApp;
+    await Promise.all([
+      loadMissionControlData(app),
+      loadMissionControlStats(app)
+    ]);
   }
   if (host.tab === "skills") {
     await loadSkills(host as unknown as OpenClawApp);
@@ -364,6 +379,11 @@ export function setTabFromRoute(host: SettingsHost, next: Tab) {
     startDebugPolling(host as unknown as Parameters<typeof startDebugPolling>[0]);
   } else {
     stopDebugPolling(host as unknown as Parameters<typeof stopDebugPolling>[0]);
+  }
+  if (next === "mission-control") {
+    startMissionControlPolling(host as unknown as Parameters<typeof startMissionControlPolling>[0]);
+  } else {
+    stopMissionControlPolling(host as unknown as Parameters<typeof stopMissionControlPolling>[0]);
   }
   if (host.connected) {
     void refreshActiveTab(host);
