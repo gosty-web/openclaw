@@ -33,10 +33,10 @@ export class WorkspaceManager {
       }
     };
 
-    this.db.exec(`
+    this.db.prepare(`
       INSERT INTO workspaces (id, name, config, created_at, updated_at)
-      VALUES ('${id}', '${name}', '${JSON.stringify(config).replace(/'/g, "''")}', ${Date.now()}, ${Date.now()})
-    `);
+      VALUES (?, ?, ?, ?, ?)
+    `).run(id, name, JSON.stringify(config), Date.now(), Date.now());
 
     return config;
   }
@@ -64,10 +64,10 @@ export class WorkspaceManager {
     if (!config) throw new Error(`Workspace ${id} not found`);
 
     config.permissions = { ...config.permissions, ...permissions };
-    this.db.exec(`
+    this.db.prepare(`
       UPDATE workspaces
-      SET config = '${JSON.stringify(config).replace(/'/g, "''")}', updated_at = ${Date.now()}
-      WHERE id = '${id}'
-    `);
+      SET config = ?, updated_at = ?
+      WHERE id = ?
+    `).run(JSON.stringify(config), Date.now(), id);
   }
 }
